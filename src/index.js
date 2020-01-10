@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import utils from './utils.js';
+import modelCalc from './modelCalc.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 const backgroundColor = 0xf1f1f1;
@@ -98,14 +99,8 @@ function modelCallBack ( gltf ) {
     utils.renderTexture(model, TEXTURE_PATH);
     //mixer = utils.renderAnimation(model, fileAnimations, "idle");
 
-    rotateJoint(neck);
-
-}
-
-function rotateJoint(joint) {
-    console.log(joint)
-    joint.rotation.y = THREE.Math.degToRad(30);
-    joint.rotation.x = THREE.Math.degToRad(30);
+    //modelCalc.rotateJoint(neck, {x: 30, y: 30, z: 30});
+    //modelCalc.moveJoint(lHand, {x: -1.49, y: 1.35, z: -1});
 }
 
 function animate() {
