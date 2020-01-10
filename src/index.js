@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import utils from './utils.js';
 import modelCalc from './modelCalc.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import * as posenet from '@tensorflow-models/posenet';
+import webCamera from './webcamera.js';
 
 const backgroundColor = 0xf1f1f1;
 const MODEL_PATH = 'models/stacy/stacy_lightweight.glb';
@@ -121,4 +123,7 @@ function animate() {
 
 animate();
 
+// const net = await posenet.load();
+
+webCamera.loadVideo();
 
