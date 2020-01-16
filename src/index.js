@@ -2,17 +2,13 @@ import * as THREE from 'three';
 import utils from './utils.js';
 import modelCalc from './modelCalc.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import * as posenet from '@tensorflow-models/posenet';
-import webCamera from './webcamera.js';
+import camPosenet from './camPosenet.js';
 
 const backgroundColor = 0xf1f1f1;
 const MODEL_PATH = 'models/stacy/stacy_lightweight.glb';
 const TEXTURE_PATH = 'models/stacy/stacy.jpg';
 
 let clock = new THREE.Clock();
-let neck, waist, head, hips, lShoulder, rShoulder, lArm, rArm, lHand, rHand,
-    lForeArm, rForeArm, lUpLeg, rUpLeg, lLeg, rLeg, lFoot, rFoot;
-
 let loader = new GLTFLoader();
 let mixer = null;
 
@@ -50,41 +46,41 @@ function modelCallBack ( gltf ) {
         }
 
         if ( o.isBone && o.name === 'mixamorigNeck' ) {
-            neck = o;
+            modelCalc.modelPoints.neck = o;
         } else if ( o.isBone && o.name === 'mixamorigSpine' ) {
-            waist = o;
+            modelCalc.modelPoints.waist = o;
         } else if ( o.isBone && o.name === 'mixamorigHead' ) {
-            head = o;
+            modelCalc.modelPoints.head = o;
         } else if ( o.isBone && o.name === 'mixamorigHips' ) {
-            hips = o;
+            modelCalc.modelPoints.hips = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftShoulder' ) {
-            lShoulder = o;
+            modelCalc.modelPoints.lShoulder = o;
         } else if ( o.isBone && o.name === 'mixamorigRightShoulder' ) {
-            rShoulder = o;
+            modelCalc.modelPoints.rShoulder = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftArm' ) {
-            lArm = o;
+            modelCalc.modelPoints.lArm = o;
         } else if ( o.isBone && o.name === 'mixamorigRightArm' ) {
-            rArm = o;
+            modelCalc.modelPoints.rArm = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftHand' ) {
-            lHand = o;
+            modelCalc.modelPoints.lHand = o;
         } else if ( o.isBone && o.name === 'mixamorigRightHand' ) {
-            rHand = o;
+            modelCalc.modelPoints.rHand = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftForeArm' ) {
-            lForeArm = o;
+            modelCalc.modelPoints.lForeArm = o;
         } else if ( o.isBone && o.name === 'mixamorigRightForeArm' ) {
-            rForeArm = o;
+            modelCalc.modelPoints.rForeArm = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftUpLeg' ) {
-            lUpLeg = o;
+            modelCalc.modelPoints.lUpLeg = o;
         } else if ( o.isBone && o.name === 'mixamorigRightUpLeg' ) {
-            rUpLeg = o;
+            modelCalc.modelPoints.rUpLeg = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftLeg' ) {
-            lLeg = o;
+            modelCalc.modelPoints.lLeg = o;
         } else if ( o.isBone && o.name === 'mixamorigRightLeg' ) {
-            rLeg = o;
+            modelCalc.modelPoints.rLeg = o;
         } else if ( o.isBone && o.name === 'mixamorigLeftFoot' ) {
-            lFoot = o;
+            modelCalc.modelPoints.lFoot = o;
         } else if ( o.isBone && o.name === 'mixamorigRightFoot' ) {
-            rFoot = o;
+            modelCalc.modelPoints.rFoot = o;
         }
 
         // Investigation process
@@ -123,7 +119,6 @@ function animate() {
 
 animate();
 
-// const net = await posenet.load();
+camPosenet.netStart(modelCalc.poseAnalysis);
 
-webCamera.loadVideo();
 
