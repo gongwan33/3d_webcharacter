@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 let initPos = null;
+let initScale = null;
 let initModelPos = null;
 
 let modelPoints = {
@@ -103,10 +104,33 @@ function jointsDelta(j1, j2) {
 function setModelJoints(mdj, deltaPos) {
     for (var key in deltaPos) {
         if (key in mdj) {
-            mdj[key].position.x = initModelPos[key].position.x + deltaPos[key].x;
-            mdj[key].position.y = initModelPos[key].position.y + deltaPos[key].y;
+            if ( key == 'lArm' ) {
+                mdj[key].position.x = initModelPos[key].position.x + deltaPos[key].x/initScale;
+                mdj[key].position.y = initModelPos[key].position.y + deltaPos[key].y/initScale;
+            }
         }
     }
+}
+
+function calcDistance(pos1, pos2) {
+    return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
+}
+
+function calcInitScale() {
+    let points = [];
+    let keys = [];
+    for (var key in initPos) {
+        if (typeof initPos[key] != 'undefined') {
+            points.push(initPos[key]);
+            keys.push(key)
+        }
+
+        if (points.length >= 2) {
+            break;
+        }
+    }
+
+    initScale = calcDistance(points[1], points[0])/calcDistance(initModelPos[keys[1]].position, initModelPos[keys[0]].position);
 }
 
 function poseAnalysis(pose) {
@@ -123,6 +147,8 @@ function poseAnalysis(pose) {
     if ('position' in modelPoints.neck) {
         if (initModelPos == null) {
             initModelPos = modelPoints;
+            calcInitScale();
+            console.log(initModelPos);
         }
 
         setModelJoints(modelPoints, delta);

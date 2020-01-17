@@ -11,8 +11,6 @@ async function netStart(cb) {
 
     let video = await webCamera.loadVideo();
 
-    console.log(video.style.offsetWidth);
-    console.log(video.style.offsetHeight);
     await poseEstimation(video, net, cb);
 }
 
