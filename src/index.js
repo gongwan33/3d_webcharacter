@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import utils from './utils.js';
+import threeUtils from './threeUtils.js';
 import modelCalc from './modelCalc.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import camPosenet from './camPosenet.js';
@@ -29,10 +29,10 @@ renderer.shadowMap.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
-utils.loadLights( scene );
-utils.loadFloor( scene );
+threeUtils.loadLights( scene );
+threeUtils.loadFloor( scene );
 
-utils.loadModel( loader, MODEL_PATH, modelCallBack );
+threeUtils.loadModel( loader, MODEL_PATH, modelCallBack );
 
 function modelCallBack ( gltf ) {
     // A lot is going to happen here
@@ -45,42 +45,8 @@ function modelCallBack ( gltf ) {
             o.receiveShadow = true;
         }
 
-        if ( o.isBone && o.name === 'mixamorigNeck' ) {
-            modelCalc.modelPoints.neck = o;
-        } else if ( o.isBone && o.name === 'mixamorigSpine' ) {
-            modelCalc.modelPoints.waist = o;
-        } else if ( o.isBone && o.name === 'mixamorigHead' ) {
-            modelCalc.modelPoints.head = o;
-        } else if ( o.isBone && o.name === 'mixamorigHips' ) {
-            modelCalc.modelPoints.hips = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftShoulder' ) {
-            modelCalc.modelPoints.lShoulder = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightShoulder' ) {
-            modelCalc.modelPoints.rShoulder = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftArm' ) {
-            modelCalc.modelPoints.lArm = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightArm' ) {
-            modelCalc.modelPoints.rArm = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftHand' ) {
-            modelCalc.modelPoints.lHand = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightHand' ) {
-            modelCalc.modelPoints.rHand = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftForeArm' ) {
-            modelCalc.modelPoints.lForeArm = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightForeArm' ) {
-            modelCalc.modelPoints.rForeArm = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftUpLeg' ) {
-            modelCalc.modelPoints.lUpLeg = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightUpLeg' ) {
-            modelCalc.modelPoints.rUpLeg = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftLeg' ) {
-            modelCalc.modelPoints.lLeg = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightLeg' ) {
-            modelCalc.modelPoints.rLeg = o;
-        } else if ( o.isBone && o.name === 'mixamorigLeftFoot' ) {
-            modelCalc.modelPoints.lFoot = o;
-        } else if ( o.isBone && o.name === 'mixamorigRightFoot' ) {
-            modelCalc.modelPoints.rFoot = o;
+        if ( o.isBone && ( o.name in threeUtils.modelBoneMap ) ) {
+            modelCalc.modelPoints[threeUtils.modelBoneMap[o.name]] = threeUtils.extractBoneInfo(o);
         }
 
         // Investigation process
@@ -94,8 +60,8 @@ function modelCallBack ( gltf ) {
 
     scene.add(model);
 
-    utils.renderTexture(model, TEXTURE_PATH);
-    //mixer = utils.renderAnimation(model, fileAnimations, "idle");
+    threeUtils.renderTexture(model, TEXTURE_PATH);
+    //mixer = threeUtils.renderAnimation(model, fileAnimations, "idle");
 
     //modelCalc.rotateJoint(neck, {x: 30, y: 30, z: 30});
     //modelCalc.moveJoint(lHand, {x: -1.49, y: 1.35, z: -1});
@@ -108,7 +74,7 @@ function animate() {
         mixer.update(clock.getDelta());
     }
 
-    if ( utils.resizeRendererToDisplaySize(renderer) ) {
+    if ( threeUtils.resizeRendererToDisplaySize(renderer) ) {
         const canvas = renderer.domElement;
         camera.aspect = canvas.clientWidth / canvas.clientHeight;
         camera.updateProjectionMatrix();

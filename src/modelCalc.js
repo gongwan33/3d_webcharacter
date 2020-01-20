@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import utils from './utils.js';
 
 let initPos = null;
 let initScale = null;
@@ -104,7 +105,7 @@ function jointsDelta(j1, j2) {
 function setModelJoints(mdj, deltaPos) {
     for (var key in deltaPos) {
         if (key in mdj) {
-            if ( key == 'lArm' ) {
+            if ( key == 'rArm' ) {
                 mdj[key].position.x = initModelPos[key].position.x + deltaPos[key].x/initScale;
                 mdj[key].position.y = initModelPos[key].position.y + deltaPos[key].y/initScale;
             }
@@ -131,6 +132,7 @@ function calcInitScale() {
     }
 
     initScale = calcDistance(points[1], points[0])/calcDistance(initModelPos[keys[1]].position, initModelPos[keys[0]].position);
+    console.log(initScale);
 }
 
 function poseAnalysis(pose) {
@@ -139,16 +141,17 @@ function poseAnalysis(pose) {
     // console.log(joints);
 
     if (initPos == null) {
-        initPos = joints;
+        initPos = utils.deepCopy(joints);
     }
 
     let delta = jointsDelta(joints, initPos);
 
     if ('position' in modelPoints.neck) {
         if (initModelPos == null) {
-            initModelPos = modelPoints;
-            calcInitScale();
+            console.log(modelPoints);
+            initModelPos = utils.deepCopy(modelPoints);
             console.log(initModelPos);
+            calcInitScale();
         }
 
         setModelJoints(modelPoints, delta);
