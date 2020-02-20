@@ -6,10 +6,24 @@
         #camvideo {
             position: absolute;
         }
+
+        .calibration {
+            align-items: center;
+            color: white;
+            display: flex;
+            font-size: 500px;
+            height: 100vh;
+            justify-content: center;
+            position: absolute;
+            text-shadow: 3px 3px 3px gray;
+            width: 100vw;
+            z-index: 800;
+        }
     </style>
   </head>
   <body>
     <video id="camvideo"></video>
+    <div class="calibration"></div>
     <script src="dist/main.js"></script>
   </body>
 </html>

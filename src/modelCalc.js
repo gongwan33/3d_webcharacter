@@ -105,7 +105,9 @@ function jointsDelta(j1, j2) {
 function setModelJoints(mdj, deltaPos) {
     for (var key in deltaPos) {
         if (key in mdj) {
-            if ( key == 'rArm' ) {
+            if ( key == 'rArm' || key == 'rHand' || key == 'rForeArm' || key == 'lArm' || key == 'lHand' || key == 'lForArm' ) {
+//                 console.log(deltaPos[key].x);
+//                 console.log(deltaPos[key].x/initScale);
                 mdj[key].position.x = initModelPos[key].position.x + deltaPos[key].x/initScale;
                 mdj[key].position.y = initModelPos[key].position.y + deltaPos[key].y/initScale;
             }
@@ -118,20 +120,16 @@ function calcDistance(pos1, pos2) {
 }
 
 function calcInitScale() {
-    let points = [];
-    let keys = [];
-    for (var key in initPos) {
-        if (typeof initPos[key] != 'undefined') {
-            points.push(initPos[key]);
-            keys.push(key)
-        }
-
-        if (points.length >= 2) {
-            break;
-        }
+    console.log(initPos);
+    console.log(initModelPos);
+    if(('lArm' in initPos) && ('lHand' in initPos) && typeof initPos['lArm'] != 'undefined' && typeof initPos['lHand'] != 'undefined') {
+        initScale = calcDistance(initPos['lArm'], initPos['lHand'])/calcDistance(initModelPos['lArm'].position, initModelPos['lHand'].position);
+    } else if(('rArm' in initPos) && ('rHand' in initPos) && typeof initPos['rArm'] != 'undefined' && typeof initPos['rHand'] != 'undefined') {
+        initScale = calcDistance(initPos['rArm'], initPos['rHand'])/calcDistance(initModelPos['rArm'].position, initModelPos['rHand'].position);
+    } else {
+        alert('Crucial Keypoints not detected! Please try again with your whole body in the scene!');
     }
 
-    initScale = calcDistance(points[1], points[0])/calcDistance(initModelPos[keys[1]].position, initModelPos[keys[0]].position);
     console.log(initScale);
 }
 
@@ -148,7 +146,6 @@ function poseAnalysis(pose) {
 
     if ('position' in modelPoints.neck) {
         if (initModelPos == null) {
-            console.log(modelPoints);
             initModelPos = utils.deepCopy(modelPoints);
             console.log(initModelPos);
             calcInitScale();

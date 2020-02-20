@@ -1,5 +1,5 @@
 const videoWidth = 300;
-const videoHeight = 200;
+const videoHeight = 225;
 
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia || navigator.mozGetUserMedia;

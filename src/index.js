@@ -7,6 +7,7 @@ import camPosenet from './camPosenet.js';
 const backgroundColor = 0xf1f1f1;
 const MODEL_PATH = 'models/stacy/stacy_lightweight.glb';
 const TEXTURE_PATH = 'models/stacy/stacy.jpg';
+const CALI_TIMEOUT = 5;
 
 let clock = new THREE.Clock();
 let loader = new GLTFLoader();
@@ -85,6 +86,19 @@ function animate() {
 
 animate();
 
-camPosenet.netStart(modelCalc.poseAnalysis);
+let caliInfo = document.querySelector('.calibration');
+let countDown = CALI_TIMEOUT;
+let timer = window.setInterval((function() {
+    caliInfo.innerText = countDown;
+    countDown--;
+
+    if(countDown < 0) {
+        window.clearInterval(timer);
+        caliInfo.style.display = 'none';
+        camPosenet.netStart(modelCalc.poseAnalysis);
+    }
+}).bind(this), 1000);
+
+
 
 
