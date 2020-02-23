@@ -2,13 +2,15 @@ import * as THREE from 'three';
 import utils from './utils.js';
 import threeUtils from './threeUtils.js';
 
+const CONF_THRESHOLD = 0.7
+
 let initPos = null;
 let initScale = null;
 let initModelPos = null;
 
 let initRotation = {
     lArm: {
-        x: 20,
+        x: 33,
         y: 0,
         z: 0,
     },
@@ -52,7 +54,9 @@ function keypointToObj(keyps) {
  
      for (let i = 0; i < keyps.length; i++) {
          let keyp = keyps[i];
-         joints[keyp.part] = position(keyp);
+         if(keyp.score > CONF_THRESHOLD) {
+             joints[keyp.part] = position(keyp);
+         }
      }
 
     return joints;
@@ -124,9 +128,9 @@ function calc2dAngle(cpos, pos1, pos2) {
         y: pos2.y - cpos.y,
     };
 
-    let angle = Math.atan(p1.y/p1.x) - Math.atan(p2.y/p2.x);
+    let angle = THREE.Math.radToDeg(Math.acos((p1.x * p2.x + p1.y * p2.y)/Math.sqrt((Math.pow(p1.x, 2) + Math.pow(p1.y, 2))*(Math.pow(p2.x, 2) + Math.pow(p2.y, 2)))));
 
-    return THREE.Math.radToDeg(angle);    
+    return 90 - angle;    
 }
 
 function jointsRotation(joints) {
@@ -136,13 +140,23 @@ function jointsRotation(joints) {
     };
 
     if (typeof joints['leftShoulder'] != 'undefined' && typeof joints['leftElbow'] != 'undefined' && typeof joints['leftHip'] != 'undefined') {
+        // console.log(joints['leftShoulder']);
+        // console.log(joints['leftElbow']);
+        // console.log(joints['leftHip']);
+        // console.log(calc2dAngle(joints['leftShoulder'], joints['leftElbow'], joints['leftHip']))
+         
         rotation['lArm'].x = THREE.Math.degToRad(calc2dAngle(joints['leftShoulder'], joints['leftElbow'], joints['leftHip']) - initRotation['lArm'].x);
         // rotation['lArm'].y = THREE.Math.degToRad(0 - initRotation['lArm'].y);
         // rotation['lArm'].z = THREE.Math.degToRad(0 - initRotation['lArm'].z);
     }
      
     if (typeof joints['rightShoulder'] != 'undefined' && typeof joints['rightElbow'] != 'undefined' && typeof joints['rightHip'] != 'undefined') {
-        rotation['rArm'].x = THREE.Math.degToRad(-calc2dAngle(joints['rightShoulder'], joints['rightElbow'], joints['rightHip']) - initRotation['rArm'].x);
+        // console.log(joints['rightShoulder']);
+        // console.log(joints['rightElbow']);
+        // console.log(joints['rightHip']);
+        // console.log(calc2dAngle(joints['rightShoulder'], joints['rightElbow'], joints['rightHip']))
+ 
+        rotation['rArm'].x = THREE.Math.degToRad(calc2dAngle(joints['rightShoulder'], joints['rightElbow'], joints['rightHip']) - initRotation['rArm'].x);
         // rotation['rArm'].y = THREE.Math.degToRad(0 - initRotation['rArm'].y);
         // rotation['rArm'].z = THREE.Math.degToRad(0 - initRotation['rArm'].z);
     }
