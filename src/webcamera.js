@@ -57,4 +57,6 @@ async function loadVideo() {
 
 export default {
     loadVideo,
+    videoWidth,
+    videoHeight,
 }

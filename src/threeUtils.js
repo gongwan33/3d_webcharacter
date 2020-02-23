@@ -131,6 +131,17 @@ function extractBoneInfo ( bone ) {
     }
 }
 
+function drawDot(x, y, z, scene) {
+    let dotGeometry = new THREE.Geometry();
+    dotGeometry.vertices.push(new THREE.Vector3( x, y, z));
+    dotGeometry.scale(7, 7, 7);
+    let dotMaterial = new THREE.PointsMaterial( { size: 5, color: 0, sizeAttenuation: false } );
+    let dot = new THREE.Points( dotGeometry, dotMaterial );
+    console.log(z);
+    dot.position.y = -11;
+    scene.add( dot );
+}
+
 export default {
     resizeRendererToDisplaySize,
     renderTexture,
@@ -140,4 +151,5 @@ export default {
     loadModel,
     extractBoneInfo,
     modelBoneMap,
+    drawDot,
 };

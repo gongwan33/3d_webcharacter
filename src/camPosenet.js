@@ -3,10 +3,12 @@ import webCamera from './webcamera.js';
 
 async function netStart(cb) {
     const net = await posenet.load({
-        architecture: 'MobileNetV1',
+        // architecture: 'MobileNetV1',
+        architecture: 'ResNet50',
         outputStride: 16,
-        inputResolution: { width: 640, height: 480 },
-        multiplier: 0.75
+        inputResolution: { width: webCamera.videoWidth, height: webCamera.videoHeight },
+        // multiplier: 0.75
+        multiplier: 1
     });
 
     let video = await webCamera.loadVideo();

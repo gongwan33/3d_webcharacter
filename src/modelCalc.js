@@ -1,9 +1,23 @@
 import * as THREE from 'three';
 import utils from './utils.js';
+import threeUtils from './threeUtils.js';
 
 let initPos = null;
 let initScale = null;
 let initModelPos = null;
+
+let initRotation = {
+    lArm: {
+        x: 20,
+        y: 0,
+        z: 0,
+    },
+    rArm: {
+        x: 33,
+        y: 0,
+        z: 0,
+    },
+};
 
 let modelPoints = {
     neck: {},
@@ -33,83 +47,122 @@ function position(keyp) {
     };
 }
 
-function keypointToModelJoints(keyps) {
-    let joints = {};
+function keypointToObj(keyps) {
+     let joints = {};
+ 
+     for (let i = 0; i < keyps.length; i++) {
+         let keyp = keyps[i];
+         joints[keyp.part] = position(keyp);
+     }
 
-    function cenPosition(right, left) {
-        return {
-            x: (right.x + left.x)/2,
-            y: (right.y + left.y)/2
-        }
-    }
-
-    for (let i = 0; i < keyps.length; i++) {
-        let keyp = keyps[i];
-        joints[keyp.part] = position(keyp);
-    }
-
-    let modelJoints = {
-        neck: joints.neck,
-        waist: cenPosition(joints.rightHip, joints.leftHip),
-        head: cenPosition(joints.rightEye, joints.leftEye),
-        hips: cenPosition(joints.rightHip, joints.leftHip),
-        lShoulder: joints.leftShoulder,
-        rShoulder: joints.rightShoulder,
-        lArm: cenPosition(joints.leftShoulder, joints.leftElbow),
-        rArm: cenPosition(joints.rightShoulder, joints.rightElbow),
-        lHand: joints.leftWrist,
-        rHand: joints.rightWrist,
-        lForeArm: cenPosition(joints.leftWrist, joints.leftElbow),
-        rForeArm: cenPosition(joints.rightWrist, joints.rightElbow),
-        lUpLeg: cenPosition(joints.leftHip, joints.leftKnee),
-        rUpLeg: cenPosition(joints.rightHip, joints.rightKnee),
-        lLeg: cenPosition(joints.leftKnee, joints.leftAnkle),
-        rLeg: cenPosition(joints.rightKnee, joints.rightAnkle),
-        lFoot: joints.leftAnkle,
-        rFoot: joints.rightAnkle,
-    }
-
-    return modelJoints;
+    return joints;
 }
 
-function rotateJoint(joint, deg) {
+// function keypointToModelJoints(keyps) {
+//     let joints = {};
+// 
+//     function cenPosition(right, left) {
+//         return {
+//             x: (right.x + left.x)/2,
+//             y: (right.y + left.y)/2
+//         }
+//     }
+// 
+//     for (let i = 0; i < keyps.length; i++) {
+//         let keyp = keyps[i];
+//         joints[keyp.part] = position(keyp);
+//     }
+// 
+//     let modelJoints = {
+//         neck: joints.neck,
+//         waist: cenPosition(joints.rightHip, joints.leftHip),
+//         head: cenPosition(joints.rightEye, joints.leftEye),
+//         hips: cenPosition(joints.rightHip, joints.leftHip),
+//         lShoulder: joints.leftShoulder,
+//         rShoulder: joints.rightShoulder,
+//         lArm: cenPosition(joints.leftShoulder, joints.leftElbow),
+//         rArm: cenPosition(joints.rightShoulder, joints.rightElbow),
+//         lHand: joints.leftWrist,
+//         rHand: joints.rightWrist,
+//         lForeArm: cenPosition(joints.leftWrist, joints.leftElbow),
+//         rForeArm: cenPosition(joints.rightWrist, joints.rightElbow),
+//         lUpLeg: cenPosition(joints.leftHip, joints.leftKnee),
+//         rUpLeg: cenPosition(joints.rightHip, joints.rightKnee),
+//         lLeg: cenPosition(joints.leftKnee, joints.leftAnkle),
+//         rLeg: cenPosition(joints.rightKnee, joints.rightAnkle),
+//         lFoot: joints.leftAnkle,
+//         rFoot: joints.rightAnkle,
+//     }
+// 
+//     return modelJoints;
+// }
+
+function rotateJoint(key, deg) {
+    let joint = modelPoints[key]; 
     console.log(joint);
-    joint.rotation.z = THREE.Math.degToRad(deg.z);
-    joint.rotation.y = THREE.Math.degToRad(deg.y);
-    joint.rotation.x = THREE.Math.degToRad(deg.x);
+    joint.rotation.z = THREE.Math.degToRad(deg.z - initRotation[key].z);
+    joint.rotation.y = THREE.Math.degToRad(deg.y - initRotation[key].y);
+    joint.rotation.x = THREE.Math.degToRad(deg.x - initRotation[key].x);
 }
 
-function moveJoint(joint, pos) {
+function moveJoint(key, pos) {
+    let joint = modelPoints[key]; 
     console.log(joint);
     joint.position.z = pos.z;
     joint.position.y = pos.y;
     joint.position.x = pos.x;
 }
 
-function jointsDelta(j1, j2) {
-    let delta = {}
-    for (var key in j1) {
-        if (typeof j1[key] == 'undefined' || typeof j2[key] == 'undefined') {
-            continue;
-        }
+function calc2dAngle(cpos, pos1, pos2) {
+    let p1 = {
+        x: pos1.x - cpos.x,
+        y: pos1.y - cpos.y,
+    };
 
-        delta[key] = {
-            x: j1[key].x - j2[key].x,
-            y: j1[key].y - j2[key].y
-        };
-    }
+    let p2 = {
+        x: pos2.x - cpos.x,
+        y: pos2.y - cpos.y,
+    };
 
-    return delta;
+    let angle = Math.atan(p1.y/p1.x) - Math.atan(p2.y/p2.x);
+
+    return THREE.Math.radToDeg(angle);    
 }
 
-function setModelJoints(mdj, deltaPos) {
-    for (var key in deltaPos) {
+function jointsRotation(joints) {
+    let rotation = {
+        lArm: {},
+        rArm: {},
+    };
+
+    if (typeof joints['leftShoulder'] != 'undefined' && typeof joints['leftElbow'] != 'undefined' && typeof joints['leftHip'] != 'undefined') {
+        rotation['lArm'].x = THREE.Math.degToRad(calc2dAngle(joints['leftShoulder'], joints['leftElbow'], joints['leftHip']) - initRotation['lArm'].x);
+        // rotation['lArm'].y = THREE.Math.degToRad(0 - initRotation['lArm'].y);
+        // rotation['lArm'].z = THREE.Math.degToRad(0 - initRotation['lArm'].z);
+    }
+     
+    if (typeof joints['rightShoulder'] != 'undefined' && typeof joints['rightElbow'] != 'undefined' && typeof joints['rightHip'] != 'undefined') {
+        rotation['rArm'].x = THREE.Math.degToRad(-calc2dAngle(joints['rightShoulder'], joints['rightElbow'], joints['rightHip']) - initRotation['rArm'].x);
+        // rotation['rArm'].y = THREE.Math.degToRad(0 - initRotation['rArm'].y);
+        // rotation['rArm'].z = THREE.Math.degToRad(0 - initRotation['rArm'].z);
+    }
+ 
+    return rotation;
+}
+
+function setModelJointsRotation(mdj, rotation) {
+    for (var key in rotation) {
         if (key in mdj) {
             if ( key == 'rArm' || key == 'rHand' || key == 'rForeArm' || key == 'lArm' || key == 'lHand' || key == 'lForArm' ) {
-//                 console.log(deltaPos[key].x);
-//                 console.log(deltaPos[key].x/initScale);
-                mdj[key].position.x = initModelPos[key].position.x + deltaPos[key].x/initScale;
-                mdj[key].position.y = initModelPos[key].position.y + deltaPos[key].y/initScale;
+                if(typeof rotation[key].x != 'undefined') {
+                    mdj[key].rotation.x = rotation[key].x;
+                }
+                if(typeof rotation[key].y != 'undefined') {
+                    mdj[key].rotation.y = rotation[key].y;
+                }
+                if(typeof rotation[key].z != 'undefined') {
+                mdj[key].rotation.z = rotation[key].z;
+                }
             }
         }
     }
@@ -119,22 +172,8 @@ function calcDistance(pos1, pos2) {
     return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 }
 
-function calcInitScale() {
-    console.log(initPos);
-    console.log(initModelPos);
-    if(('lArm' in initPos) && ('lHand' in initPos) && typeof initPos['lArm'] != 'undefined' && typeof initPos['lHand'] != 'undefined') {
-        initScale = calcDistance(initPos['lArm'], initPos['lHand'])/calcDistance(initModelPos['lArm'].position, initModelPos['lHand'].position);
-    } else if(('rArm' in initPos) && ('rHand' in initPos) && typeof initPos['rArm'] != 'undefined' && typeof initPos['rHand'] != 'undefined') {
-        initScale = calcDistance(initPos['rArm'], initPos['rHand'])/calcDistance(initModelPos['rArm'].position, initModelPos['rHand'].position);
-    } else {
-        alert('Crucial Keypoints not detected! Please try again with your whole body in the scene!');
-    }
-
-    console.log(initScale);
-}
-
 function poseAnalysis(pose) {
-    let joints = keypointToModelJoints(pose.keypoints);
+    let joints = keypointToObj(pose.keypoints);
 
     // console.log(joints);
 
@@ -142,16 +181,16 @@ function poseAnalysis(pose) {
         initPos = utils.deepCopy(joints);
     }
 
-    let delta = jointsDelta(joints, initPos);
+    let rotation = jointsRotation(joints);
 
-    if ('position' in modelPoints.neck) {
+    if ('rotation' in modelPoints.neck) {
         if (initModelPos == null) {
             initModelPos = utils.deepCopy(modelPoints);
-            console.log(initModelPos);
-            calcInitScale();
         }
 
-        setModelJoints(modelPoints, delta);
+        // console.log(rotation);
+
+        setModelJointsRotation(modelPoints, rotation);
     }
 }
 

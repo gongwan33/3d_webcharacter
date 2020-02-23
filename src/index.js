@@ -27,18 +27,21 @@ let renderer = new THREE.WebGLRenderer({
 });
 
 renderer.shadowMap.enabled = true;
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-threeUtils.loadLights( scene );
-threeUtils.loadFloor( scene );
+threeUtils.loadLights(scene);
+threeUtils.loadFloor(scene);
 
-threeUtils.loadModel( loader, MODEL_PATH, modelCallBack );
+threeUtils.loadModel(loader, MODEL_PATH, modelCallBack);
 
 function modelCallBack ( gltf ) {
     // A lot is going to happen here
     let model = gltf.scene;
     let fileAnimations = gltf.animations;
+
+    model.scale.set(7, 7, 7);
+    model.position.y = -11;
 
     model.traverse(o => {
         if ( o.isMesh ) {
@@ -56,16 +59,17 @@ function modelCallBack ( gltf ) {
         // }
     });
 
-    model.scale.set(7, 7, 7);
-    model.position.y = -11;
+    // console.log(modelCalc.modelPoints);
 
     scene.add(model);
 
     threeUtils.renderTexture(model, TEXTURE_PATH);
-    //mixer = threeUtils.renderAnimation(model, fileAnimations, "idle");
+    // mixer = threeUtils.renderAnimation(model, fileAnimations, "idle");
 
-    //modelCalc.rotateJoint(neck, {x: 30, y: 30, z: 30});
-    //modelCalc.moveJoint(lHand, {x: -1.49, y: 1.35, z: -1});
+    // modelCalc.rotateJoint('lArm', {x: 0, y: 0, z: 0});
+    // modelCalc.rotateJoint('rArm', {x: 0, y: 0, z: 0});
+    // modelCalc.rotateJoint('lForeArm', {x: -10, y: 0, z: 0});
+    // modelCalc.moveJoint('lHand', {x: -1.49, y: 1.35, z: -1});
 }
 
 function animate() {
