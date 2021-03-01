@@ -34,6 +34,6 @@
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs-converter": "^1.5.1",
     "@tensorflow/tfjs-core": "^1.5.1",
-    "three": "^0.112.1"
+    "three": "^0.125.0"
   }
 }
